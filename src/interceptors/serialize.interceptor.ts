@@ -8,8 +8,23 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
+import { UserDto } from 'src/users/dtos/user.dto';
+
+interface ClassConstructor {
+
+    new ( ...args: any[ ] ): { };
+    
+}
+
+export function Serialize( dto: any ) {
+
+    return UseInterceptors( new SerializeInterceptor( dto ) );
+
+}
 
 export class SerializeInterceptor implements NestInterceptor {
+
+    constructor( private dto: any ) { }
     
     intercept( context: ExecutionContext, handler: CallHandler ): Observable< any > {
         
@@ -22,6 +37,9 @@ export class SerializeInterceptor implements NestInterceptor {
 
                 // Run something before the response is sent out
                 console.log( 'Iam running before response is sent out', data );
+                return plainToClass( this.dto, data, { 
+                    excludeExtraneousValues: true
+                } )
             } )
         )
     }
